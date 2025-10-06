@@ -1,0 +1,36 @@
+ <!DOCTYPE html>
+ <html lang="en">
+ <head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Nimbus Arena</title>
+ <link rel="stylesheet" href="css/style.css">
+ <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js"></script>
+ </head>
+ <body>
+ <div id="game-container">
+ <div id="login-ui" class="ui-panel">
+ <h1>Nimbus Arena</h1>
+<h1>Nimbus Arena</h1>
+ <input type="text" id="username" placeholder="Username" />
+ <input type="password" id="password" placeholder="Password" />
+ <button id="login-btn">Login</button>
+ <button id="register-btn">Register</button>
+ <div id="login-message"></div>
+ </div>
+ <div id="game-ui" class="hidden">
+ <div id="score-panel">
+ <h3>Score: <span id="score">0</span></h3>
+ <button id="leaderboard-btn">Leaderboard</button>
+ </div>
+ <div id="phaser-game"></div>
+ </div>
+ <div id="leaderboard-ui" class="ui-panel hidden">
+ <h2>Leaderboard</h2>
+ <div id="leaderboard-list"></div>
+ <button id="back-btn">Back to Game</button>
+ </div>
+ </div>
+ <script type="module" src="js/game.js"></script>
+ </body>
+ </html>
