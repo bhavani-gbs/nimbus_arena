@@ -1,40 +1,63 @@
- version version: :  '3.8' '3.8'
- services services: :
-    postgres postgres: :
-        image image: : postgres postgres: :1515
-        environment environment: :
-            POSTGRES_USER POSTGRES_USER: : postgres postgres
-            POSTGRES_PASSWORD POSTGRES_PASSWORD: : postgres postgres
-            POSTGRES_DB POSTGRES_DB: : nimbus_arena nimbus_arena
-        ports ports: :
-            --  "5432:5432" "5432:5432"
-        volumes volumes: :
-            -- postgres_data postgres_data: :/var/lib/postgresql/data /var/lib/postgresql/data
-            -- ./server/database/schema.sql ./server/database/schema.sql: :/docker /docker--entrypoint entrypoint--initdb.d/init.sql initdb.d/init.sql
-    redis redis: :
-        image image: : redis redis: :7 7
-        ports ports: :
-            --  "6379:6379" "6379:6379"
-        command command: : redis redis--server server ----appendonly yes appendonly yes
-        volumes volumes: :
-volumes:- redis_data:/data
- server:
- build: ./server
- ports:- "3000:3000"
- environment:
- DB_HOST: postgres
- DB_PORT: 5432
- DB_NAME: nimbus_arena
- DB_USER: postgres
- DB_PASSWORD: postgres
- REDIS_URL: redis://redis:6379
- JWT_SECRET: your-secret-key-change-in-production
- depends_on:- postgres- redis
- volumes:- ./server:/app- /app/node_modules
- client:
- build: ./client
- ports:- "8080:80"
- volumes:- ./client:/usr/share/nginx/html
- volumes:
- postgres_data:
-  redis_data:
+version: '3.8'  # Note: The version warning can be ignored for now; remove later if desired
+services:
+  postgres:
+    platform: linux/amd64
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: nimbus_arena
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./server/database/schema.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    platform: linux/amd64
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  server:
+    platform: linux/amd64
+    build: ./server
+    ports:
+      - "3000:3000"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: nimbus_arena
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: your-secret-key-change-in-production
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+
+  client:
+    platform: linux/amd64
+    build: ./client
+    ports:
+      - "8080:80"
+    depends_on:
+      - server
+
+volumes:
+  postgres_data:
